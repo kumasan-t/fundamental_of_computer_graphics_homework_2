@@ -1,0 +1,7 @@
+/build
+/bin
+xcuserdata
+project.xcworkspace
+.DS_Store
+.vs/
+model.opensdf
