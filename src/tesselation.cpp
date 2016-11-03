@@ -50,16 +50,38 @@ void facet_normals(Mesh* mesh) {
 // smooth out normal - does not duplicate data
 void smooth_normals(Mesh* mesh) {
     // PLACEHOLDER CODE - REMOVE AFTER FUNCTION IS IMPLEMENTED
-    mesh->norm.resize(mesh->pos.size());
     // YOUR CODE GOES HERE ---------------------
     // set normals array to the same length as pos and init all elements to zero
+    mesh->norm.resize(mesh->pos.size());
     // foreach triangle
-        // compute face normal
-        // accumulate face normal to the vertex normals of each face index
-    // foreach quad
-        // compute face normal
-        // accumulate face normal to the vertex normals of each face index
+	vector<vec3f> normals = mesh->norm;
+	for (vec3i triangle : mesh->triangle) {
+		// compute face normal
+		vec3f first_side_vector = mesh->pos[triangle.x] - mesh->pos[triangle.y];
+		vec3f second_side_vector = mesh->pos[triangle.x] - mesh->pos[triangle.z];
+		vec3f triangle_face_normal = cross(first_side_vector, second_side_vector);
+		// accumulate face normal to the vertex normals of each face index
+		normals[triangle.x] += triangle_face_normal;
+		normals[triangle.y] += triangle_face_normal;
+		normals[triangle.z] += triangle_face_normal;
+	}
+	// foreach quad
+	for (vec4i quad : mesh->quad) {
+		// compute face normal
+		vec3f quad_face_normal = normalize(
+			normalize(cross(mesh->pos[quad.y] - mesh->pos[quad.x], mesh->pos[quad.z] - mesh->pos[quad.x])) +
+			normalize(cross(mesh->pos[quad.z] - mesh->pos[quad.x], mesh->pos[quad.w] - mesh->pos[quad.x])));
+		// accumulate face normal to the vertex normals of each face index
+		normals[quad.x] += quad_face_normal;
+		normals[quad.y] += quad_face_normal;
+		normals[quad.w] += quad_face_normal;
+		normals[quad.z] += quad_face_normal;
+	}
     // normalize all vertex normals
+	for (int i = 0; i < normals.size; i++) {
+		normals[i] = normalize(normals[i]);
+	}
+	mesh->norm = normals;
 }
 
 // smooth out tangents
