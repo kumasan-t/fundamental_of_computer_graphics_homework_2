@@ -27,14 +27,19 @@ uniform sampler2D material_norm_txt;  // material norm texture
 float distSqr(vec3 a, vec3 b) { return pow(length(a - b),2); }
 // main
 void main() {
+	vec3 ks = material_ks;
+	vec3 kd = material_kd;
     // re-normalize normals
     vec3 n = normalize(norm);
     vec3 accumulated_color = vec3(1,0,0);   // initialize to red to see it well
     // YOUR CODE GOES HERE ---------------------
     // lookup normal map if needed
     // compute material values by looking up textures is necessary
+	if (material_kd_txt_on) { kd = material_kd * vec3(texture2D(material_kd_txt,texcoord)); }
+	if (material_ks_txt_on) { ks = material_ks * vec3(texture2D(material_ks_txt,texcoord)); }
+	if (material_norm_txt_on) { n = normalize(2 * vec3(texture2D(material_norm_txt,texcoord)) - vec3(1)); }
     // accumulate ambient
-	accumulated_color = ambient * material_kd;
+	accumulated_color = ambient * kd;
     // foreach light
 	for (int i = 0; i < lights_num; i++) {
         // compute point light color at pos
@@ -45,10 +50,10 @@ void main() {
 		vec3 viewer_direction = normalize(camera_pos - pos);
         // compute h
 		vec3 bisector_h = normalize(light_direction + viewer_direction);
-		vec3 diffuse = material_kd;
-		vec3 specular = material_ks * pow(max(0.0f, dot(n, bisector_h)), material_n);
+		vec3 diffuse = kd;
+		vec3 specular = ks * pow(max(0.0f, dot(bisector_h,n)), material_n);
         // accumulate blinn-phong model
-		accumulated_color += light_color * (diffuse + specular) * abs(dot(n,light_direction));
+		accumulated_color += light_color * (diffuse + specular) * max(0,dot(n,light_direction));
 	}
     // output final color by setting gl_FragColor
     gl_FragColor = vec4(accumulated_color,1);
