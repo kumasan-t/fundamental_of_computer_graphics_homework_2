@@ -78,7 +78,7 @@ void smooth_normals(Mesh* mesh) {
 		normals[quad.z] += quad_face_normal;
 	}
     // normalize all vertex normals
-	for (int i = 0; i < normals.size; i++) {
+	for (int i = 0; i < normals.size(); i++) {
 		normals[i] = normalize(normals[i]);
 	}
 	mesh->norm = normals;
@@ -105,32 +105,98 @@ void subdivide_catmullclark(Mesh* subdiv) {
     // YOUR CODE GOES HERE ---------------------
     // skip is needed
     // allocate a working Mesh copied from the subdiv
+	Mesh* working_mesh = subdiv;
     // foreach level
-        // make empty pos and quad arrays
-        // create edge_map from current mesh
-        // linear subdivision - create vertices
-        // copy all vertices from the current mesh
-        // add vertices in the middle of each edge (use EdgeMap)
-        // add vertices in the middle of each triangle
-        // add vertices in the middle of each quad
-        // subdivision pass --------------------------------
-        // compute an offset for the edge vertices
-        // compute an offset for the triangle vertices
-        // compute an offset for the quad vertices
-        // foreach triangle
-            // add three quads to the new quad array
-        // foreach quad
-            // add four quads to the new quad array
-        // averaging pass ----------------------------------
-        // create arrays to compute pos averages (avg_pos, avg_count)
-        // arrays have the same length as the new pos array, and are init to zero
-        // for each new quad
-            // compute quad center using the new pos array
-            // foreach vertex index in the quad
-        // normalize avg_pos with its count avg_count
-        // correction pass ----------------------------------
-        // foreach pos, compute correction p = p + (avg_p - p) * (4/avg_count)
-        // set new arrays pos, quad back into the working mesh; clear triangle array
+	for (int i = 0; i < working_mesh->subdivision_catmullclark_level; i++) {
+		// make empty pos and quad arrays
+		vector<vec3f> working_pos;
+		vector<vec4i> working_quad;
+		// create edge_map from current mesh
+		EdgeMap edge_map = EdgeMap(working_mesh->triangle,working_mesh->quad);
+		// linear subdivision - create vertices
+		vector<vec3f> working_vertices;
+		// copy all vertices from the current mesh
+		for (auto triangle : working_mesh->triangle) {
+			working_vertices.push_back(working_mesh->pos[triangle.x]);
+			working_vertices.push_back(working_mesh->pos[triangle.y]);
+			working_vertices.push_back(working_mesh->pos[triangle.z]);
+		}
+		for (auto quad : working_mesh->quad) {
+			working_vertices.push_back(working_mesh->pos[quad.x]);
+			working_vertices.push_back(working_mesh->pos[quad.y]);
+			working_vertices.push_back(working_mesh->pos[quad.w]);
+			working_vertices.push_back(working_mesh->pos[quad.z]);
+		}
+		// add vertices in the middle of each edge (use EdgeMap)
+		for (vec2i edge : edge_map._edge_list) {
+			vec3f temp_mid_edge_vertex = (working_mesh->pos[edge.x] + working_mesh->pos[edge.y]) / 2.0f;
+			working_pos.push_back(temp_mid_edge_vertex);
+		}
+		// add vertices in the middle of each triangle
+		for (auto triangle : working_mesh->triangle) {
+			vec3f temp_mid_triangle_vertex = (
+				working_mesh->pos[triangle.x] +
+				working_mesh->pos[triangle.y] +
+				working_mesh->pos[triangle.z])
+				/ 3.0f;
+			working_pos.push_back(temp_mid_triangle_vertex);
+		}
+		// add vertices in the middle of each quad
+		for (auto quad : working_mesh->quad) {
+			vec3f temp_mid_quad_vertex = (
+				working_mesh->pos[quad.x] +
+				working_mesh->pos[quad.y] +
+				working_mesh->pos[quad.w] +
+				working_mesh->pos[quad.z] )
+				/ 4.0f;
+			working_pos.push_back(temp_mid_quad_vertex);
+		}
+		// subdivision pass --------------------------------
+		// compute an offset for the edge vertices
+		int edge_vertex_index = working_mesh->triangle.size() + working_mesh->quad.size() - 1;
+		// compute an offset for the triangle vertices
+		int triangle_vertex_index = edge_vertex_index + edge_map._edge_list.size();
+		// compute an offset for the quad vertices
+		int quad_vertex_index = triangle_vertex_index + working_mesh->triangle.size();
+		// foreach triangle
+		for (auto triangle : working_mesh->triangle) {
+			// add three quads to the new quad array	
+			vec4i temp_quad = vec4i(
+				triangle.x,
+				edge_vertex_index,
+				triangle_vertex_index,
+				edge_vertex_index + 2
+				);
+			vec4i temp_quad = vec4i(
+				triangle.y,
+				edge_vertex_index,
+				triangle_vertex_index,
+				edge_vertex_index + 1
+				);
+			vec4i temp_quad = vec4i(
+				triangle.z,
+				edge_vertex_index + 2,
+				triangle_vertex_index,
+				edge_vertex_index + 1
+				);
+
+			edge_vertex_index += 3;
+			triangle_vertex_index += 1;
+			working_quad.push_back(temp_quad);
+		}
+		// foreach quad
+		// add four quads to the new quad array
+		// averaging pass ----------------------------------
+		// create arrays to compute pos averages (avg_pos, avg_count)
+		// arrays have the same length as the new pos array, and are init to zero
+		// for each new quad
+		// compute quad center using the new pos array
+		// foreach vertex index in the quad
+		// normalize avg_pos with its count avg_count
+		// correction pass ----------------------------------
+		// foreach pos, compute correction p = p + (avg_p - p) * (4/avg_count)
+		// set new arrays pos, quad back into the working mesh; clear triangle array
+	}
     // clear subdivision
     // according to smooth, either smooth_normals or facet_normals
     // copy back
