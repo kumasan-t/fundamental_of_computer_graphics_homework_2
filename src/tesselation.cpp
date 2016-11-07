@@ -162,21 +162,21 @@ void subdivide_catmullclark(Mesh* subdiv) {
 			// add three quads to the new quad array	
 			vec4i temp_quad = vec4i(
 				triangle.x,
-				edge_map.edge_index(vec2i(triangle.x,triangle.y)),
+				edge_vertex_index,
 				triangle_vertex_index,
-				edge_map.edge_index(vec2i(triangle.z,triangle.x))
+				edge_vertex_index + 2
 				);
 			temp_quad = vec4i(
 				triangle.y,
-				edge_map.edge_index(vec2i(triangle.y, triangle.z)),
+				edge_vertex_index + 1,
 				triangle_vertex_index,
-				edge_map.edge_index(vec2i(triangle.x, triangle.y))
+				edge_vertex_index
 				);
 			temp_quad = vec4i(
 				triangle.z,
-				edge_map.edge_index(vec2i(triangle.z, triangle.x)),
+				edge_vertex_index + 2,
 				triangle_vertex_index,
-				edge_map.edge_index(vec2i(triangle.y, triangle.z))
+				edge_vertex_index + 1
 				);
 
 			edge_vertex_index += 3;
@@ -188,27 +188,27 @@ void subdivide_catmullclark(Mesh* subdiv) {
 			// add four quads to the new quad array
 			vec4i temp_quad = vec4i(
 				quad.w,
-				edge_map.edge_index(vec2i(quad.w,quad.x)),
+				edge_vertex_index,
 				quad_vertex_index,
-				edge_map.edge_index(vec2i(quad.z, quad.w))
+				edge_vertex_index + 3
 				);
 			temp_quad = vec4i(
 				quad.x,
-				edge_map.edge_index(vec2i(quad.x, quad.y)),
+				edge_vertex_index + 1,
 				quad_vertex_index,
-				edge_map.edge_index(vec2i(quad.w, quad.x))
+				edge_vertex_index
 				);
 			temp_quad = vec4i(
 				quad.y,
-				edge_map.edge_index(vec2i(quad.y, quad.z)),
+				edge_vertex_index + 2,
 				quad_vertex_index,
-				edge_map.edge_index(vec2i(quad.x, quad.y))
+				edge_vertex_index + 1
 				);
 			temp_quad = vec4i(
 				quad.z,
-				edge_map.edge_index(vec2i(quad.z, quad.w)),
+				edge_vertex_index + 3,
 				quad_vertex_index,
-				edge_map.edge_index(vec2i(quad.y, quad.z))
+				edge_vertex_index + 2
 				);
 
 			edge_vertex_index += 4;
