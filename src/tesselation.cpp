@@ -236,11 +236,9 @@ void subdivide_catmullclark(Mesh* subdiv) {
 		working_mesh->pos = pos;
 		working_mesh->quad = new_quad;
 		working_mesh->triangle.clear();
-		message("ARRIVATO FIN QUI!!!1\n");
 	}
     // clear subdivision
     // according to smooth, either smooth_normals or facet_normals
-	message("ARRIVATO FIN QUI!!!\n");
 	(working_mesh->subdivision_catmullclark_smooth) ? smooth_normals(working_mesh) : facet_normals(working_mesh);
     // copy back
 	subdiv = working_mesh;
