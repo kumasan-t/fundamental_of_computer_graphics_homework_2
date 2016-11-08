@@ -115,17 +115,7 @@ void subdivide_catmullclark(Mesh* subdiv) {
 		EdgeMap edge_map = EdgeMap(working_mesh->triangle,working_mesh->quad);
 		// linear subdivision - create vertices
 		// copy all vertices from the current mesh
-		for (vec3i triangle : working_mesh->triangle) {
-			pos.push_back(working_mesh->pos[triangle.x]);
-			pos.push_back(working_mesh->pos[triangle.y]);
-			pos.push_back(working_mesh->pos[triangle.z]);
-		}
-		for (vec4i quad : working_mesh->quad) {
-			pos.push_back(working_mesh->pos[quad.x]);
-			pos.push_back(working_mesh->pos[quad.y]);
-			pos.push_back(working_mesh->pos[quad.z]);
-			pos.push_back(working_mesh->pos[quad.w]);
-		}
+		pos = working_mesh->pos;
 		// add vertices in the middle of each edge (use EdgeMap)
 		for (vec2i edge : edge_map.edges()) {
 			vec3f temp_mid_edge_vertex = (working_mesh->pos[edge.x] + working_mesh->pos[edge.y]) / 2.0f;
@@ -152,7 +142,7 @@ void subdivide_catmullclark(Mesh* subdiv) {
 		}
 		// subdivision pass --------------------------------
 		// compute an offset for the edge vertices
-		int edge_vertex_index = 3 * working_mesh->triangle.size() + 4 * working_mesh->quad.size();
+		int edge_vertex_index = working_mesh->pos.size();
 		// compute an offset for the triangle vertices
 		int triangle_vertex_index = edge_vertex_index + edge_map.edges().size();
 		// compute an offset for the quad vertices
@@ -249,14 +239,12 @@ void subdivide_catmullclark(Mesh* subdiv) {
 		message("ARRIVATO FIN QUI!!!1\n");
 	}
     // clear subdivision
-	//free(subdiv);
     // according to smooth, either smooth_normals or facet_normals
 	message("ARRIVATO FIN QUI!!!\n");
-	(working_mesh->subdivision_catmullclark_smooth) ? facet_normals(working_mesh) : facet_normals(working_mesh);
+	(working_mesh->subdivision_catmullclark_smooth) ? smooth_normals(working_mesh) : facet_normals(working_mesh);
     // copy back
 	subdiv = working_mesh;
     // clear
-	//free(working_mesh);
 }
 
 // subdivide bezier spline into line segments (assume bezier has only bezier segments and no lines)
