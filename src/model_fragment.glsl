@@ -42,19 +42,19 @@ void main() {
 	accumulated_color = ambient * kd;
     // foreach light
 	for (int i = 0; i < lights_num; i++) {
-        // compute point light color at pos
-		vec3 light_color = light_intensity[i] / distSqr(light_pos[i],pos);
-        // compute light direction at pos
-		vec3 light_direction = normalize(light_pos[i] - pos);
-        // compute view direction using camera_pos and pos
-		vec3 viewer_direction = normalize(camera_pos - pos);
-        // compute h
-		vec3 bisector_h = normalize(light_direction + viewer_direction);
-		vec3 diffuse = kd;
-		vec3 specular = ks * pow(max(0.0f, dot(bisector_h,n)), material_n);
-        // accumulate blinn-phong model
-		accumulated_color += light_color * (diffuse + specular) * max(0,dot(n,light_direction));
-	}
+	        // compute point light color at pos
+			vec3 light_color = light_intensity[i] / distSqr(light_pos[i],pos);
+	        // compute light direction at pos
+			vec3 light_direction = normalize(light_pos[i] - pos);
+	        // compute view direction using camera_pos and pos
+			vec3 viewer_direction = normalize(camera_pos - pos);
+	        // compute h
+			vec3 bisector_h = normalize(light_direction + viewer_direction);
+			vec3 diffuse = kd;
+			vec3 specular = ks * pow(max(abs(dot(bisector_h,n)),0.0f), material_n);
+	        // accumulate blinn-phong model
+			accumulated_color += light_color * (diffuse + specular) * max(0,dot(n,light_direction));
+		}    
     // output final color by setting gl_FragColor
     gl_FragColor = vec4(accumulated_color,1);
 }
